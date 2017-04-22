@@ -1,0 +1,18 @@
+package kr.co.jhta.service.board;
+
+import java.util.List;
+
+import kr.co.jhta.vo.Board;
+import kr.co.jhta.vo.SearchForm;
+
+public interface BoardService {
+
+	void addNoticeBoard(Board board);
+
+	int searchBoardCount(SearchForm searchForm);
+
+	List<Board> searchBoard(SearchForm searchForm);
+
+	void searchDeleteBoardByNo(int no);
+
+}

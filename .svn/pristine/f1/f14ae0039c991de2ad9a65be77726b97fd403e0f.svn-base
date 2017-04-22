@@ -1,0 +1,38 @@
+package kr.co.jhta.service.hakjuk;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Random;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import kr.co.jhta.dao.hakjuk.HakjukDAO;
+import kr.co.jhta.dao.user.StudentDao;
+import kr.co.jhta.vo.hakjuk.StudentSearchForm;
+import kr.co.jhta.vo.stu.Student;
+
+@Service
+public class HakjukServiceImpl implements HakjukService{
+	
+	
+	@Autowired
+	private StudentDao studDao;
+	
+	@Autowired
+	private HakjukDAO hakjukDao;
+	
+	@Override
+	public void admissionsStud(Student stud) {
+		Random rand = new Random();
+		String id = (new Date().getYear()-100)+""+(rand.nextInt(99)+10)+((stud.getName().hashCode()*rand.nextInt(99)+10)+"").substring(1,4);
+		System.out.println(id);
+		stud.setId(id);
+		studDao.addNewStudent(stud);
+	}
+	
+	@Override
+	public List<Student> searchStudent(StudentSearchForm ssf) {
+		return hakjukDao.getStudentListBySearchStud(ssf);
+	}
+}

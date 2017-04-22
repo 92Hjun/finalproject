@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.jhta.dao.major.SemesterDao">
+
+	<insert id="addSemester" parameterType="Semester"> 
+		insert into s_semester 
+		(S_NO, S_SEME_SELECT, S_TERM_ST, S_TERM_END, S_ENROLLTERM_ST, S_ENROLLTERM_END, 
+		S_ENROLLEDITTERM_ST, S_ENROLLEDITTERM_END, S_APPLYTERM_ST, S_APPLYTERM_END, 
+		S_EVALTERM_ST, S_EVALTERM_END, S_GRADETERM_ST, S_GRADETERM_END, 
+		S_GRADEEDITTERM_ST, S_GRADEEDITTERM_END, S_APPEALTERM_ST, S_APPEALTERM_END,
+		S_COURSETERM_ST, S_COURSETERM_END)
+		values
+		(s_semester_seq.nextval, #{semeSelect}, #{termStart}, #{termEnd}, #{enrollTermStart}, #{enrollTermEnd}, 
+		#{enrollEditTermStart}, #{enrollEditTermEnd}, #{applyTermStart}, #{applyTermEnd},
+		#{evalTermStart}, #{evalTermEnd}, #{gradeTermStart}, #{gradeTermEnd}, 
+		#{gradeEditTermStart}, #{gradeEditTermEnd}, #{appealTermStart}, #{appealTermEnd},
+		#{courseTermStart}, #{courseTermEnd})
+	</insert>
+	
+	<select id="getAllSemester" resultType="Semester">
+		select 
+			S_NO as no, 
+			S_SEME_SELECT as semeSelect, 
+			S_TERM_ST as termStart, 
+			S_TERM_END as termEnd, 
+			S_ENROLLTERM_ST as enrollTermStart, 
+			S_ENROLLTERM_END as enrollTermEnd, 
+			S_ENROLLEDITTERM_ST as enrollEditTermStart, 
+			S_ENROLLEDITTERM_END as enrollEditTermEnd, 
+			S_APPLYTERM_ST as applyTermStart, 
+			S_APPLYTERM_END as applyTermEnd, 
+			S_EVALTERM_ST as evalTermStart, 
+			S_EVALTERM_END as evalTermEnd, 
+			S_GRADETERM_ST as gradeTermStart, 
+			S_GRADETERM_END as gradeTermEnd, 
+			S_GRADEEDITTERM_ST as gradeEditTermStart, 
+			S_GRADEEDITTERM_END as gradeEditTermEnd, 
+			S_APPEALTERM_ST as appealTermStart, 
+			S_APPEALTERM_END as appealTermEnd,
+			S_COURSETERM_ST as courseTermStart, 
+			S_COURSETERM_END as courseTermEnd
+		from s_semester
+	</select>
+	
+	
+</mapper>

@@ -1,0 +1,25 @@
+package kr.co.jhta.controller.score;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import kr.co.jhta.service.major.SemesterService;
+import kr.co.jhta.service.major.SubjectService;
+import kr.co.jhta.service.score.ScoreService;
+
+
+@Controller
+public class ScoreListController {
+	@Autowired
+	private ScoreService scoreService;
+			
+	@RequestMapping("/scorelist.do")
+	public String scorelist(Model model){
+		
+		System.out.println(scoreService.getAllScoreList());
+		return "score/scorelist";
+	}
+		
+}

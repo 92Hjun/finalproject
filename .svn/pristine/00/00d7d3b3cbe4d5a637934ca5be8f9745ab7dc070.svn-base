@@ -1,0 +1,14 @@
+package kr.co.jhta.service.user;
+
+import org.springframework.beans.factory.annotation.Autowired;
+
+import kr.co.jhta.dao.user.RegisubjectDao;
+
+public class RegisubjectServiceImpl implements RegisubjectService{
+
+	@Autowired
+	RegisubjectDao regisubjectDao;
+	
+	
+	
+}

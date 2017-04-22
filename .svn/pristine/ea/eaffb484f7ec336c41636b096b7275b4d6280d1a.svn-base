@@ -1,0 +1,13 @@
+package kr.co.jhta.dao.score;
+
+import java.util.List;
+
+import kr.co.jhta.vo.Score;
+import kr.co.jhta.vo.SubjectRegister;
+
+public interface ScoreDao {
+	
+	List<SubjectRegister> getAllRegiList();
+	List<Score> getAllScoreList();
+
+}

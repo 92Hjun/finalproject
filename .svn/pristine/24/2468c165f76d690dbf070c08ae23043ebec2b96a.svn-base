@@ -1,0 +1,17 @@
+package kr.co.jhta.service.score;
+
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import kr.co.jhta.vo.Score;
+import kr.co.jhta.vo.SubjectRegister;
+
+@Transactional
+@Service
+public interface ScoreService {
+	List<SubjectRegister> getAllRegiList();
+	List<Score> getAllScoreList();
+	SubjectRegister getRegiListByNo(int regiNo);
+}

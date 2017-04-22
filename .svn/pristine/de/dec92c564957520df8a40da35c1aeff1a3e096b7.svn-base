@@ -1,0 +1,21 @@
+package kr.co.jhta.service.message;
+
+import java.util.List;
+
+import kr.co.jhta.vo.Professor;
+import kr.co.jhta.vo.stu.Student;
+
+public class MessageServiceImpl implements MessageService {
+	
+	
+	
+	@Override
+	public List<Student> getAddressByStuName(String checkedRadio) {
+		return null;
+	}
+	
+	@Override
+	public List<Professor> getAddressByProName(String searchWord) {
+		return null;
+	}
+}
