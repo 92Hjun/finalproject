@@ -38,4 +38,8 @@ public interface BoardService {
 
 	void addStuQnaBoard(Board board);
 
+	void addFreeBoard(Board board);
+
+	void addDeptBoard(Board board);
+
 }

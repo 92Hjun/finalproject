@@ -1,5 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -22,6 +24,40 @@
 			<hr style="border:solid 0.5px #2C7BB5;">
 		</div>
 		<div style="margin-top: 20px;"></div>
+		<div class="row">
+			<table class="table table-default">
+				<colgroup>
+					<col width="5%">
+					<col width="*">
+					<col width="5%">
+					<col width="10%">
+					<col width="5%">
+				</colgroup>
+				<thead>
+					<tr>
+						<th>번호</th>
+						<th>제목</th>
+						<th>작성자</th>
+						<th>날짜</th>
+						<th>조회수</th>
+					</tr>
+				</thead>
+				<tbody>
+					<c:forEach var="board" items="${boardList }">
+						<tr>
+							<td>${board.no }</td>
+							<td><a href="studboarddetail?bno=${board.no }">${board.title }</a></td>
+							<td>${board.writer }</td>
+							<td> <fmt:formatDate value="${board.regdate }"/> </td>
+							<td>${board.countView }</td>
+						</tr>
+					</c:forEach>
+				</tbody>
+			</table>
+			<div class="text-right">
+				<a href="addfreeboard" class="btn btn-primary btn-sm">등록</a>
+			</div>
+		</div>
 	</div>
 <%@ include file="/WEB-INF/views/footer/footer.jsp" %>
 </body>

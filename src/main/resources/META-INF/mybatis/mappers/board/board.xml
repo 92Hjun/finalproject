@@ -29,7 +29,26 @@
 			b_category = #{category}
 			
 	</select>
+	<insert id="addDeptBoard" parameterType="Board">
+		insert into
+				B_BOARD(
+						B_NO,
+						B_TITLE,
+						B_CONTENTS,
+						B_WRITER,
+						B_DEPARTMENT,
+						B_CATEGORY
+						)
+				VALUES(
+						B_BOARD_SEQ.NEXTVAL,
+						#{title},
+						#{contents},
+						#{writer},
+						#{department},
+						#{category}
+					  )
 	
+	</insert>
 	<insert id="addProfBoard" parameterType="Board">
 		insert into
 				B_BOARD (
@@ -76,6 +95,25 @@
 				#{subjectNo}
 				)
 	
+	</insert>
+	
+	<insert id="addFreeBoard" parameterType="Board">
+		insert into
+			B_BOARD (
+					B_NO,
+					B_TITLE,
+					B_CONTENTS,
+					B_WRITER,
+					B_CATEGORY
+					)
+			values 
+				(
+				B_BOARD_SEQ.NEXTVAL,
+				#{title},
+				#{contents},
+				#{writer},
+				#{category}
+				)
 	</insert>
 	
 	

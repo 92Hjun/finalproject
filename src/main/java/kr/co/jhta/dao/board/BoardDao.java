@@ -38,4 +38,8 @@ public interface BoardDao {
 
 	void addStuQnaBoard(Board board);
 
+	void addFreeBoard(Board board);
+
+	void addDeptBoard(Board board);
+
 }

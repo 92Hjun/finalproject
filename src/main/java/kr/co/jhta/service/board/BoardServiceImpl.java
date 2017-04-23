@@ -98,5 +98,17 @@ public class BoardServiceImpl implements BoardService{
 		
 	}
 
+	@Override
+	public void addFreeBoard(Board board) {
+		boardDao.addFreeBoard(board);
+		
+	}
+
+	@Override
+	public void addDeptBoard(Board board) {
+		boardDao.addDeptBoard(board);
+		
+	}
+
 	
 }

@@ -316,7 +316,8 @@ public class BoardController {
 		return "/profboard/profnoticeboard";
 	}
 	@RequestMapping(value="/prof/profqnaboard", method=RequestMethod.GET)
-	public String profqnaBoard(){
+	public String profqnaBoard(Professor professor){
+		
 		return "/profboard/profqnaboard";
 	}
 	
@@ -366,7 +367,7 @@ public class BoardController {
 		SiteMap sitemap = sitemapSerivce.getSitemapByCodeService(prof.getDivision());
 		
 		if (err.hasErrors()) {
-			return "/prof/boardform";
+			return "/profboard/boardform";
 		}
 		
 		MultipartFile upFile = boardForm.getAttachFile();
@@ -390,16 +391,10 @@ public class BoardController {
 	}
 	
 	@RequestMapping(value="/prof/profdetail", method=RequestMethod.GET)
-	public String profBoardDetail (@RequestParam int bno, Model model, HttpSession session){
-		
-		Professor professor = (Professor)session.getAttribute("LOGIN_USER");
-		
-		if (professor == null) {
-			return "redirect:/login?err=deny";
-		}
-		
+	public String profBoardDetail (@RequestParam int bno, Model model, Professor professor){
 		// 조회수 중복 증가 ㄴㄴ
 		List<BoardView> viewUser = boardService.getBoardViewUser(bno);
+		List<Review> reviewList = reviewService.getAllReviewByNo(bno);
 		if (!viewUser.isEmpty()) {
 			for (BoardView vUser : viewUser) {
 				if (!professor.getName().equals(vUser.getUserId())) {
@@ -410,6 +405,7 @@ public class BoardController {
 					boardService.updateCount(bno);
 				}else {
 					Board board = boardService.getBoard(bno);
+					model.addAttribute("reviewList", reviewList);
 					model.addAttribute("board", board);
 					return "profboard/profdeptboarddetail";
 				}
@@ -422,10 +418,42 @@ public class BoardController {
 			boardService.updateCount(bno);
 		}
 		Board board = boardService.getBoard(bno);
+		model.addAttribute("reviewList", reviewList);
 		model.addAttribute("board", board);
 		
 		return "profboard/profdeptboarddetail";
 	}
+	// 교수 학과게시판 리뷰등록
+	@RequestMapping(value="/prof/profdeptaddreview", method=RequestMethod.POST)
+	public String profDeptAddReview(@RequestParam int bno, String reviewContents, Professor professor){
+		Review review = new Review();
+		review.setContents(reviewContents);
+		review.setGroupNo(bno);
+		review.setWriter(professor.getName());
+		reviewService.addReview(review);
+		
+		return "redirect:/prof/profdetail?bno="+bno;
+	}
+	
+	// 교수 학과게시판 리뷰 삭제(본인확인)
+	@RequestMapping(value="/prof/deleteprofdeptboardreview")
+	public String profDeptReviewDelete(@RequestParam int rno, Professor professor){
+		
+		Review review = reviewService.getReviewByNo(rno);
+		
+		if (!professor.getName().equals(review.getWriter())) {
+		
+			return "redirect:/prof/profdetail?bno="+review.getGroupNo()+"&err=deny";
+		
+		}else {
+		
+			reviewService.deleteReview(rno);
+			
+		}
+		
+		return "redirect:/prof/profdetail?bno="+review.getGroupNo();
+		
+	};
 	
 	@RequestMapping(value="/prof/modified", method=RequestMethod.GET)
 	public String profBoardModified(@RequestParam int bno, Model model ){
@@ -438,16 +466,10 @@ public class BoardController {
 	}
 	
 	@RequestMapping(value="/prof/modified", method=RequestMethod.POST)
-	public String profBoardModifiedAdd(@Valid BoardForm boardForm, HttpSession session, Errors err, @RequestParam int bno, Model model)throws Exception{
+	public String profBoardModifiedAdd(@Valid BoardForm boardForm, Professor professor, Errors err, @RequestParam int bno, Model model)throws Exception{
 		if (err.hasErrors()) {
 			return "/board/boardmodified";
 		}
-		Professor professor = (Professor)session.getAttribute("LOGIN_USER");
-		
-		if (professor == null) {
-			return "redirect:/login?err=deny";
-		}
-		
 		MultipartFile upFile = boardForm.getAttachFile();
 
 		Board board = boardService.getBoard(bno);
@@ -474,19 +496,245 @@ public class BoardController {
 	// 학생게시판
 	
 	// 학생 학과
+	// 학과 게시판 보이기
 	@RequestMapping(value="/stud/studeptboard", method=RequestMethod.GET)
-	public String studeptboard (HttpSession session, Model model) {
-
+	public String studeptboard (Student student, SearchForm searchForm, Model model) {
+		searchForm.setDepartment(student.getDivision());
+		searchForm.setSearchBoardType("D");
+		
+		int rows = boardService.searchBoardCount(searchForm);
+		
+		PageNation pageNation = null;
+		
+		if (searchForm.getDisplay() != 0) {
+			pageNation = new PageNation(searchForm.getDisplay(), searchForm.getPageNo(), rows);
+		}else {
+			pageNation = new PageNation(searchForm.getPageNo(), rows);
+		}
+		
+		searchForm.setBeginIndex(pageNation.getBeginIndex());
+		searchForm.setEndIndex(pageNation.getEndIndex());
+		
+		
+		List<Board> boardList = boardService.searchBoard(searchForm);
+		model.addAttribute("search", searchForm);
+		model.addAttribute("pagination", pageNation);
+		model.addAttribute("boardList", boardList);
 		
 		return "/stuboard/studeptboard";
 	}
 	
+	// 학과게시판 디테일
+	@RequestMapping(value="/stud/deptboarddetail", method=RequestMethod.GET)
+	public String sutdFreeBoardDetail(@RequestParam int bno,Model model,Student student){
+		
+		List<BoardView> viewUser = boardService.getBoardViewUser(bno);
+		List<Review> reviewList = reviewService.getAllReviewByNo(bno);
+		if (!viewUser.isEmpty()) {
+			for (BoardView vUser : viewUser) {
+				if (!student.getName().equals(vUser.getUserId())) {
+					BoardView view = new BoardView();
+					view.setBno(bno);
+					view.setUserId(student.getName());
+					boardService.addBoardView(view);
+					boardService.updateCount(bno);
+				}else {
+					Board board = boardService.getBoard(bno);
+					model.addAttribute("board", board);
+					model.addAttribute("reviewList", reviewList);
+					return "/stuboard/studdeptboarddetail";
+				}
+			}
+		}else {
+			BoardView view = new BoardView();
+			view.setBno(bno);
+			view.setUserId(student.getName());
+			boardService.addBoardView(view);
+			boardService.updateCount(bno);
+		}
+		Board board = boardService.getBoard(bno);
+		model.addAttribute("board", board);
+		model.addAttribute("reviewList", reviewList);
+		return "/stuboard/studdeptboarddetail";
+	}
+	
+	// 학과 게시판 등록
+	@RequestMapping(value="/stud/adddeptboard", method=RequestMethod.GET)
+	public String studDeptAddBoard(Model model){
+		
+		model.addAttribute("boardForm", new BoardForm());
+		
+		return "/stuboard/studdeptaddboardform";
+	}
+	@RequestMapping(value="/stud/adddeptboard", method=RequestMethod.POST)
+	public String studDeptAdd(@Valid BoardForm boardForm, Errors err, Student student){
+		if (err.hasErrors()) {
+			return "/stuboard/studdeptaddboardform";
+		}
+		
+		Board board = new Board();
+		
+		BeanUtils.copyProperties(boardForm, board);
+		
+		board.setWriter(student.getName());
+		board.setCategory("D");
+		SiteMap siteMap = sitemapSerivce.getSitemapByCodeService(student.getDivision());
+		board.setDepartment(siteMap.getName());
+		
+		boardService.addDeptBoard(board);
+		
+		return "redirect:/stud/studeptboard";
+	}
+	
+	// 학과 게시판 리뷰 등록
+	@RequestMapping(value="/stud/deptboardaddreview", method=RequestMethod.POST)
+	public String deptBoardAddReview(@RequestParam int bno,String reviewContents, Student student){
+		
+		Review review = new Review();
+		review.setContents(reviewContents);
+		review.setGroupNo(bno);
+		review.setWriter(student.getName());
+		reviewService.addReview(review);
+		
+		return "redirect:/stud/deptboarddetail?bno="+bno;
+		
+	}
+	// 학과게시판 리뷰 삭제(본인확인)
+	@RequestMapping(value="/stud/deletedeptboardreview")
+	public String deptBoardReviewDelete(@RequestParam int rno, Student student){
+		Review review = reviewService.getReviewByNo(rno);
+		
+		if (!student.getName().equals(review.getWriter())) {
+			return "/stud/deletedeptboardreview?err=deny";
+		}else {
+			reviewService.deleteReview(rno);
+		}
+		return "redirect:/stud/deptboarddetail?bno="+review.getGroupNo();
+	}
+	
+	
+	
 	// 학생 자유
 	@RequestMapping(value="/stud/stufreeboard", method=RequestMethod.GET)
-	public String stufreeboard (HttpSession session, Model model) {
-
+	public String stufreeboard (SearchForm searchForm,Model model) {
+		
+		searchForm.setSearchBoardType("F");
+		int rows = boardService.searchBoardCount(searchForm);
+		
+		PageNation pageNation = null;
+		
+		if (searchForm.getDisplay() != 0) {
+			pageNation = new PageNation(searchForm.getDisplay(), searchForm.getPageNo(), rows);
+		}else {
+			pageNation = new PageNation(searchForm.getPageNo(), rows);
+		}
+		
+		searchForm.setBeginIndex(pageNation.getBeginIndex());
+		searchForm.setEndIndex(pageNation.getEndIndex());
+		
+		
+		List<Board> boardList = boardService.searchBoard(searchForm);
+		model.addAttribute("search", searchForm);
+		model.addAttribute("pagination", pageNation);
+		model.addAttribute("boardList", boardList);
+		
 		
 		return "/stuboard/stufreeboard";
+	}
+	
+	// 자유게시판 등록
+	@RequestMapping(value="/stud/addfreeboard", method=RequestMethod.GET)
+	public String stuFreeBoardForm (Model model) {
+		
+		model.addAttribute("boardForm", new BoardForm());
+		
+		return "/stuboard/addfreeboard";
+	}
+	
+	// 자유게시판 등록
+	@RequestMapping(value="/stud/addfreeboard", method=RequestMethod.POST)
+	public String stuFreeAddBoard (@Valid BoardForm boardForm, Errors err, Student student) {
+		if (err.hasErrors()) {
+			return "/stuboard/addfreeboard";
+		}
+		Board board = new Board();
+		
+		BeanUtils.copyProperties(boardForm, board);
+		
+		board.setCategory("F");
+		board.setWriter(student.getName());
+		board.setDepartment(student.getDivision());
+		
+		boardService.addFreeBoard(board);
+		
+		return "redirect:/stud/stufreeboard";
+	}
+	
+	// 자유게시판 디테일
+	@RequestMapping(value="/stud/studboarddetail",method=RequestMethod.GET)
+	public String stuDetailBoard(@RequestParam int bno,Model model, Student student){
+
+		// 조회수 중복 증가 ㄴㄴ
+		List<BoardView> viewUser = boardService.getBoardViewUser(bno);
+		List<Review> reviewList = reviewService.getAllReviewByNo(bno);
+		
+		if (!viewUser.isEmpty()) {
+			for (BoardView vUser : viewUser) {
+				if (!student.getName().equals(vUser.getUserId())) {
+					BoardView view = new BoardView();
+					view.setBno(bno);
+					view.setUserId(student.getName());
+					boardService.addBoardView(view);
+					boardService.updateCount(bno);
+				}else {
+					Board board = boardService.getBoard(bno);
+					model.addAttribute("board", board);
+					model.addAttribute("reviewList", reviewList);
+					return "/stuboard/studfreeboarddetail";
+				}
+			}
+		}else {
+			BoardView view = new BoardView();
+			view.setBno(bno);
+			view.setUserId(student.getName());
+			boardService.addBoardView(view);
+			boardService.updateCount(bno);
+		}
+		Board board = boardService.getBoard(bno);
+		model.addAttribute("board", board);
+		model.addAttribute("reviewList", reviewList);
+		
+		return "/stuboard/studfreeboarddetail";
+	}
+	
+	// 자유게시판 리뷰
+	@RequestMapping(value="/stud/freeboardaddreview",method=RequestMethod.POST)
+	public String addFreeBoardReview(@RequestParam int bno, String reviewContents, Student student){
+		Review review = new Review();
+		
+		review.setGroupNo(bno);
+		review.setContents(reviewContents);
+		review.setWriter(student.getName());
+		
+		reviewService.addReview(review);
+		
+		return "redirect:/stud/studboarddetail?bno="+bno;
+	}
+	
+	// 자유게시판 리뷰 삭제(본인확인)
+	@RequestMapping(value="/stud/deletefreeboardreview", method=RequestMethod.GET)
+	public String deleteFreeBoardReview (@RequestParam int rno, Student student){
+			
+			Review review = reviewService.getReviewByNo(rno);
+			
+			if (!student.getName().equals(review.getWriter())) {
+				
+				return "/stud/studboarddetail?err=deny";
+			}else {
+				reviewService.deleteReview(rno);
+			}
+		
+		return "redirect:/stud/studboarddetail?bno="+review.getGroupNo();
 	}
 	
 	// 학생 qna
@@ -577,10 +825,6 @@ public class BoardController {
 		model.addAttribute("boardList", boardList);
 		model.addAttribute("pagination", pageNation);
 		
-		/*SearchForm [pageNo=1, searchType=, keyword=, searchBoardType=null,
-		 *  department=null, subjectNo=HU1007, beginIndex=0, endIndex=0, display=10]*/
-		
-		
 		return "/stuboard/stuqnaboard";
 	}
 	
@@ -598,8 +842,6 @@ public class BoardController {
 			subjectCode.add(subjectL);
 		}
 		
-		/*
-		model.addAttribute("subject", mapList);*/
 		
 		model.addAttribute("boardForm", new BoardForm());
 		model.addAttribute("subject", subjectCode);
@@ -609,8 +851,9 @@ public class BoardController {
 	@RequestMapping(value="/stud/stuqnaboardform", method=RequestMethod.POST)
 	public String stuQnaBoardAdd(@Valid BoardForm boardForm, Errors err, Student student){
 		if (err.hasErrors()) {
-			return "/stud/stuqnaboardform";
+			return "/stuboard/stuqnaboardform";
 		}
+		
 		Board board = new Board();
 		
 		BeanUtils.copyProperties(boardForm, board);
@@ -620,7 +863,6 @@ public class BoardController {
 		SiteMap siteMap = sitemapSerivce.getSitemapByCodeService(student.getDivision());
 		
 		board.setDepartment(siteMap.getName());
-		System.out.println(board);
 		boardService.addStuQnaBoard(board);
 		
 		return "redirect:/stud/stuqnaboard";
@@ -631,7 +873,6 @@ public class BoardController {
 		
 		List<BoardView> viewUser = boardService.getBoardViewUser(bno);
 		List<Review> reviewList = reviewService.getAllReviewByNo(bno);
-		System.out.println(reviewList);
 		if (!viewUser.isEmpty()) {
 			for (BoardView vUser : viewUser) {
 				if (!student.getName().equals(vUser.getUserId())) {
@@ -643,9 +884,7 @@ public class BoardController {
 				}else {
 					Board board = boardService.getBoard(bno);
 					model.addAttribute("board", board);
-					System.out.println(bno);
 					model.addAttribute("reviewList", reviewList);
-					System.out.println("@@@@@@@@@@e덜됨"+reviewList);
 					return "/stuboard/stuqnadetail";
 				}
 			}
@@ -658,13 +897,13 @@ public class BoardController {
 		}
 		Board board = boardService.getBoard(bno);
 		model.addAttribute("board", board);
-		System.out.println("@@@@@@@@@@다됨"+reviewList);
 		model.addAttribute("reviewList", reviewList);
 		
 		return "/stuboard/stuqnadetail";
 		
 	}
 	
+	// 리뷰등록
 	@RequestMapping(value="/stud/addreview", method=RequestMethod.POST)
 	public String addReview (@RequestParam int bno, String reviewContents,Student student) {
 		
@@ -675,5 +914,21 @@ public class BoardController {
 		reviewService.addReview(review);
 		
 		return "redirect:/stud/stuqnadetail?bno="+bno;
+	}
+	
+	// 리뷰 삭제 (본인확인)
+	@RequestMapping(value="/stud/deleteReview", method=RequestMethod.GET)
+	public String deleteReview (@RequestParam int rno, Student student){
+			
+			Review review = reviewService.getReviewByNo(rno);
+			
+			if (!student.getName().equals(review.getWriter())) {
+				
+				return "/stud/stuqnadetail?err=deny";
+			}else {
+				reviewService.deleteReview(rno);
+			}
+		
+		return "redirect:/stud/stuqnadetail?bno="+review.getGroupNo();
 	}
 }

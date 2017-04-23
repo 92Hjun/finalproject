@@ -10,4 +10,7 @@ public interface ReviewService {
 
 	List<Review> getAllReviewByNo(int bno);
 
+	Review getReviewByNo(int rno);
+	
+	void deleteReview(int rno);
 }

@@ -10,4 +10,8 @@ public interface ReviewDao {
 
 	List<Review> getAllReviewByNo(int bno);
 
+	Review getReviewByNo(int rno);
+
+	void deleteReview(int rno);
+
 }

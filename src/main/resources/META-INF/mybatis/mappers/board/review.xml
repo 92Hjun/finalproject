@@ -33,4 +33,25 @@
 			R_GROUPNO = #{groupNo}
 	</select>
 	
+	<select id="getReviewByNo" parameterType="int" resultType="Review">
+		select 
+			R_NO as no, 
+			R_GROUPNO as groupNo, 
+			R_CONTENTS as contents, 
+			R_WRITER as writer, 
+			R_REGDATE as regdate
+		from 
+			R_REVIEW
+		where 
+			R_NO = #{no}
+	</select>
+	
+	<delete id="deleteReview" parameterType="int">
+		delete 
+			FROM 
+				R_REVIEW 
+			WHERE 
+				r_no = #{no}	
+	</delete>
+	
 </mapper>

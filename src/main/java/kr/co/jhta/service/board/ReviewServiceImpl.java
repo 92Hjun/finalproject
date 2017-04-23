@@ -23,5 +23,16 @@ public class ReviewServiceImpl implements ReviewService{
 	public List<Review> getAllReviewByNo(int bno) {
 		return reviewDao.getAllReviewByNo(bno);
 	}
+
+	@Override
+	public Review getReviewByNo(int rno) {
+		return reviewDao.getReviewByNo(rno);
+	}
+
+	@Override
+	public void deleteReview(int rno) {
+		reviewDao.deleteReview(rno);
+		
+	}
 	
 }
