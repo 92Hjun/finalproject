@@ -1,5 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -32,6 +34,32 @@
 		<div class="text-right">
 			<a href="modified?bno=${board.no }" class="btn btn-danger btn-xs">수정</a>
 			<a href="board" class="btn btn-default btn-xs">뒤로가기</a>
+		</div>
+		<hr>
+		<div class="row">
+			<c:if test="${empty reviewList }">
+				<p>댓글이 존재하지 않습니다.</p>
+			</c:if>
+			<c:if test="${!empty reviewList }">
+				<c:forEach var="review" items="${reviewList }">
+					<div class="well">
+						<div class="form-inline">
+							<strong>${review.writer }</strong><div class="text-reight"> <fmt:formatDate value="${review.regdate }"/> </div>
+						</div>
+						<hr>
+						<p>${review.contents }</p>
+					</div>
+					<hr>
+				</c:forEach>
+			</c:if>
+		</div>
+		<div class="row well">
+		<form action="addreview?bno=${board.no }" method="post">
+			<textarea name="reviewContents" rows="7" class="form-control"></textarea>
+			<div class="text-right" style="margin-top: 20px;">
+				<button type="submit" class="btn btn-primary">등록</button>
+			</div>
+		</form>
 		</div>
 	</div>
 <%@ include file="/WEB-INF/views/footer/footer.jsp" %>

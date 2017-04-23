@@ -5,7 +5,6 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
@@ -19,10 +18,10 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import kr.co.jhta.service.board.BoardService;
+import kr.co.jhta.service.board.ReviewService;
 import kr.co.jhta.service.sitemap.SitemapService;
 import kr.co.jhta.service.user.RegisubjectService;
 import kr.co.jhta.vo.Board;
@@ -30,6 +29,7 @@ import kr.co.jhta.vo.BoardForm;
 import kr.co.jhta.vo.BoardView;
 import kr.co.jhta.vo.PageNation;
 import kr.co.jhta.vo.Professor;
+import kr.co.jhta.vo.Review;
 import kr.co.jhta.vo.SearchForm;
 import kr.co.jhta.vo.SiteMap;
 import kr.co.jhta.vo.Subject;
@@ -44,6 +44,9 @@ public class BoardController {
 	
 	@Autowired
 	private BoardService boardService;
+	
+	@Autowired
+	private ReviewService reviewService;
 	
 	@Autowired
 	private SitemapService sitemapSerivce;
@@ -491,10 +494,8 @@ public class BoardController {
 	public String stuqnaboard (Student student, Model model, SearchForm searchForm) {
 		
 		List<Regisubject> regiList = regisubjectService.getRegisByUserNoService(student.getNo());
-		
-		System.out.println("수강과목 "+regiList);
-		
 		List<Subject> subjectCode = new ArrayList<Subject>();
+		
 		searchForm.setSearchBoardType("Q");
 		
 		List<Board> boardList = null;
@@ -534,15 +535,26 @@ public class BoardController {
 		
 	}
 	
-	@RequestMapping(value="/stud/stuqnaboard/search", method=RequestMethod.POST)
-	public @ResponseBody Map<String, Object> searchBoardBySubjectCode (@RequestParam String subjectCode, Model model) {
-		System.out.println(subjectCode);
-		SearchForm searchForm = new SearchForm();
-		searchForm.setSubjectNo(subjectCode);
+	@RequestMapping(value="/stud/stuqnaboard", method=RequestMethod.POST)
+	public String searchBoardBySubjectCode (SearchForm searchForm, Model model, Student student) {
+		List<Regisubject> regiList = regisubjectService.getRegisByUserNoService(student.getNo());
+		List<Subject> subjectCode = new ArrayList<Subject>();
+		
+		
 		searchForm.setSearchBoardType("Q");
+		SiteMap siteMap = sitemapSerivce.getSitemapByCodeService(student.getDivision());
+		
+		searchForm.setDepartment(siteMap.getName());
+		
+		for (Regisubject subject : regiList) {
+			Subject subjectL = new Subject();
+			subjectL.setSubjectName(subject.getSubject().getSubjectName());
+			subjectL.setEnday(subject.getSubject().getSiteCode().getCode());
+			
+			subjectCode.add(subjectL);
+		}
 		
 		int rows = boardService.searchBoardCount(searchForm);
-		
 		
 		PageNation pageNation = null;
 		
@@ -556,18 +568,20 @@ public class BoardController {
 		searchForm.setEndIndex(pageNation.getEndIndex());
 		
 		searchForm.setDisplay(10);
-		
 		List<Board> boardList = boardService.searchBoard(searchForm);
 		
+		
+		
+		model.addAttribute("subject", subjectCode);
 		model.addAttribute("search", searchForm);
 		model.addAttribute("boardList", boardList);
 		model.addAttribute("pagination", pageNation);
 		
-		Map<String, Object> map = new HashMap<String, Object>();
+		/*SearchForm [pageNo=1, searchType=, keyword=, searchBoardType=null,
+		 *  department=null, subjectNo=HU1007, beginIndex=0, endIndex=0, display=10]*/
 		
-		map.put("modelList", model);
-
-		return map;
+		
+		return "/stuboard/stuqnaboard";
 	}
 	
 	@RequestMapping(value="/stud/stuqnaboardform", method=RequestMethod.GET)
@@ -575,18 +589,20 @@ public class BoardController {
 
 		List<Regisubject> regiList = regisubjectService.getRegisByUserNoService(student.getNo());
 		
-		Map<String, Object> map = new HashMap<String, Object>();
-		List<Map<String , Object>> mapList = new ArrayList<Map<String,Object>>();
+		List<Subject> subjectCode = new ArrayList<Subject>();
+		
 		for (Regisubject subject : regiList) {
-			
-			map.put("sbjectName", subject.getSubject().getSubjectName());
-			map.put("subjectCode", subject.getSubject().getSiteCode().getCode());
-			mapList.add(map);
+			Subject subjectL = new Subject();
+			subjectL.setSubjectName(subject.getSubject().getSubjectName());
+			subjectL.setEnday(subject.getSubject().getSiteCode().getCode());
+			subjectCode.add(subjectL);
 		}
 		
-		model.addAttribute("subject", mapList);
-		model.addAttribute("boardForm", new BoardForm());
+		/*
+		model.addAttribute("subject", mapList);*/
 		
+		model.addAttribute("boardForm", new BoardForm());
+		model.addAttribute("subject", subjectCode);
 		return "/stuboard/stuqnaboardform";
 	}
 	
@@ -604,7 +620,7 @@ public class BoardController {
 		SiteMap siteMap = sitemapSerivce.getSitemapByCodeService(student.getDivision());
 		
 		board.setDepartment(siteMap.getName());
-		
+		System.out.println(board);
 		boardService.addStuQnaBoard(board);
 		
 		return "redirect:/stud/stuqnaboard";
@@ -614,6 +630,8 @@ public class BoardController {
 	public String stuDetailBoard (@RequestParam int bno, Student student, Model model) {
 		
 		List<BoardView> viewUser = boardService.getBoardViewUser(bno);
+		List<Review> reviewList = reviewService.getAllReviewByNo(bno);
+		System.out.println(reviewList);
 		if (!viewUser.isEmpty()) {
 			for (BoardView vUser : viewUser) {
 				if (!student.getName().equals(vUser.getUserId())) {
@@ -625,6 +643,9 @@ public class BoardController {
 				}else {
 					Board board = boardService.getBoard(bno);
 					model.addAttribute("board", board);
+					System.out.println(bno);
+					model.addAttribute("reviewList", reviewList);
+					System.out.println("@@@@@@@@@@e덜됨"+reviewList);
 					return "/stuboard/stuqnadetail";
 				}
 			}
@@ -637,8 +658,22 @@ public class BoardController {
 		}
 		Board board = boardService.getBoard(bno);
 		model.addAttribute("board", board);
+		System.out.println("@@@@@@@@@@다됨"+reviewList);
+		model.addAttribute("reviewList", reviewList);
 		
 		return "/stuboard/stuqnadetail";
 		
+	}
+	
+	@RequestMapping(value="/stud/addreview", method=RequestMethod.POST)
+	public String addReview (@RequestParam int bno, String reviewContents,Student student) {
+		
+		Review review = new Review();
+		review.setGroupNo(bno);
+		review.setContents(reviewContents);
+		review.setWriter(student.getName());
+		reviewService.addReview(review);
+		
+		return "redirect:/stud/stuqnadetail?bno="+bno;
 	}
 }

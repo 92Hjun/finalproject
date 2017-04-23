@@ -27,8 +27,8 @@
 		<div class="row well">
 			<form:form action="stuqnaboardform" commandName="boardForm">
 				<select class="form-control" name="subjectSelect">
-					<c:forEach var="sub" items="${subjectName }">
-						<option value="${sub.subjectCode }">${sub.subjectName }</option>
+					<c:forEach var="sub" items="${subject }">
+						<option value="${sub.enday }">${sub.subjectName }</option>
 					</c:forEach>
 				</select>
 				<div class="form-group">

@@ -16,6 +16,7 @@
 		<typeAlias alias="Professor" type="kr.co.jhta.vo.Professor"/>
 		<typeAlias alias="Syllabus" type="kr.co.jhta.vo.Syllabus"/>
 		<typeAlias alias="Board" type="kr.co.jhta.vo.Board"/>
+		<typeAlias alias="Review" type="kr.co.jhta.vo.Review"/>
 		<typeAlias alias="SearchForm" type="kr.co.jhta.vo.SearchForm"/>
 		<typeAlias alias="SubjectIsPassed" type="kr.co.jhta.vo.SubjectIsPassed"/>
 		<typeAlias alias="ScheduleEvent" type="kr.co.jhta.vo.ScheduleEvent"/>
@@ -56,7 +57,7 @@
 		<mapper resource="META-INF/mybatis/mappers/message/message.xml"/>
 		<mapper resource="META-INF/mybatis/mappers/report/stuReport.xml"/>
 		<mapper resource="META-INF/mybatis/mappers/lecture/SupplementAryLecture.xml"/>
-		<!-- <mapper resource="META-INF/mybatis/mappers/board/review.xml"/> -->
+		<mapper resource="META-INF/mybatis/mappers/board/review.xml"/>
 		<!-- <mapper resource="META-INF/mybatis/mappers/messege.xml"/> -->
 	</mappers>
 </configuration>

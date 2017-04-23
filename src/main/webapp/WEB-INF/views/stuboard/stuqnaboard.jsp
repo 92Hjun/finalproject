@@ -14,18 +14,18 @@
 <script type="text/javascript">
 	$(function(){
 		
+		var code = '';
+		code = $('select[name="subjectSelect"]').val();
+		$('#search-form :input[name="subjectNo"]').val(code);
+		
 		$('select[name="subjectSelect"]').change(function(){
-			var code = $(this).val();
-			console.log(code);
-			$.ajax({
-				type:'post',
-				url: 'stuqnaboard/search',
-				data: {subjectCode : code},
-				dataType:'json',
-				success : function(data){
-					data
-				}
-			});
+			 code = $('select[name="subjectSelect"]').val();
+			$('#search-form :input[name="subjectNo"]').val(code);
+		});
+		
+		$('#search-btn').click(function(){
+			
+			$('#search-form').submit();
 		});
 		
 	});
@@ -44,11 +44,14 @@
 		</div>
 		<div style="margin-top: 20px;"></div>
 		<div class="row well">
-			<select class="form-control" name="subjectSelect">
-			<c:forEach var="item" items="${subject }">
-				<option value="${item.enday }">${item.subjectName }</option>
-			</c:forEach>
-			</select>
+			<div class="form-inline">
+				<select class="form-control" name="subjectSelect" style="width: 300px;">
+				<c:forEach var="item" items="${subject }">
+					<option value="${item.enday }">${item.subjectName }</option>
+				</c:forEach>
+				</select>
+				<button id="search-btn" class="btn btn-primary">검색</button>
+			</div>
 		</div>
 		<div class="row">
 			<table class="table table-striped">
@@ -92,7 +95,9 @@
 			<a href="stuqnaboardform" class="btn btn-primary btn-xs">Q&amp;A 등록</a>
 		</div>
 		<div class="text-center">
-			<%@ include file="/WEB-INF/views/board/nav.jsp" %>
+			<div class="text-center">
+				<%@ include file="/WEB-INF/views/board/nav.jsp" %>
+			</div>
 		</div>
 	</div>
 	<form id="search-form" action="stuqnaboard" method="post">
@@ -100,6 +105,7 @@
 		<input type="hidden" name="searchType"  value="${serch.searchType }">
 		<input id="keyword" type="hidden" name="keyword" value="${search.keyword }" >
 		<input type="hidden" name="display"  value="10">
+		<input type="hidden" name="subjectNo" value="">
 	</form>
 <%@ include file="/WEB-INF/views/footer/footer.jsp" %>
 </body>
