@@ -29,6 +29,7 @@
 		<typeAlias alias="professoropenlecture" type="kr.co.jhta.vo.ProfessorOpenLecture"/>
 		<typeAlias alias="evaluationSheet" type="kr.co.jhta.vo.LectureEvaluationSheet"/>
 		<typeAlias alias="SupplementAryLecture" type="kr.co.jhta.vo.SupplementAryLecture"/>
+		<typeAlias alias="TimeChart" type="kr.co.jhta.vo.TimeChart"/>
 	</typeAliases>
 	
 	<mappers>
@@ -58,6 +59,7 @@
 		<mapper resource="META-INF/mybatis/mappers/report/stuReport.xml"/>
 		<mapper resource="META-INF/mybatis/mappers/lecture/SupplementAryLecture.xml"/>
 		<mapper resource="META-INF/mybatis/mappers/board/review.xml"/>
+		<mapper resource="META-INF/mybatis/mappers/timechart/timechart.xml"/>
 		<!-- <mapper resource="META-INF/mybatis/mappers/messege.xml"/> -->
 	</mappers>
 </configuration>

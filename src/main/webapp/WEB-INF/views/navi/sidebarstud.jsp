@@ -51,7 +51,7 @@ $(function() {
                         <ul id="submenu-5" class="panel-collapse collapse panel-switch" role="menu">
                             <li><a href="stuReport"><i class="fa fa-caret-right"></i>과제 관리</a></li>
                             <li><a href="#"><i class="fa fa-caret-right"></i>출결 관리</a></li>
-                            <li><a href="#"><i class="fa fa-caret-right"></i>시간표</a></li>
+                            <li><a href="studenttimechart"><i class="fa fa-caret-right"></i>시간표</a></li>
                         </ul>
                     </li>
                     <li>

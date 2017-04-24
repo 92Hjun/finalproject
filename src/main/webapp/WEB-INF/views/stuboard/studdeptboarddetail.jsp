@@ -50,6 +50,12 @@
 						</div>
 						<hr>
 						<p>${review.contents }</p>
+						<c:if test="${!empty param.err }">
+							<hr>
+							<div class="text-center">
+								<h3 class="text-danger">본인이 작성한 댓글만 삭제할수 있습니다.</h3>
+							</div>
+						</c:if>
 						<div class="text-right">
 							<a href="deletedeptboardreview?rno=${review.no }" class="btn btn-danger btn-xs">삭제</a>
 						</div>

@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
 import org.apache.commons.io.IOUtils;
@@ -111,7 +110,6 @@ public class BoardController {
 		return "/board/homeboard";
 	}
 	
-	
 	// 게시판 화면
 	@RequestMapping(value="/admin/boardform", method=RequestMethod.GET)
 	public String boardForm(Model model){
@@ -135,12 +133,11 @@ public class BoardController {
 	
 	// 게시글 수정완료
 	@RequestMapping(value="/admin/modified", method=RequestMethod.POST)
-	public String modifiedBoardAdd(@Valid BoardForm boardForm, HttpSession session, Errors err, @RequestParam int bno, Model model)throws Exception{
+	public String modifiedBoardAdd(@Valid BoardForm boardForm, Professor professor, Errors err, @RequestParam int bno, Model model)throws Exception{
 		
 		if (err.hasErrors()) {
 			return "/board/boardmodified";
 		}
-		Professor professor = (Professor)session.getAttribute("LOGIN_USER");
 		
 		if (professor == null) {
 			return "redirect:/login?err=deny";
@@ -170,14 +167,7 @@ public class BoardController {
 	
 	// 어드민 게시판 디테일
 	@RequestMapping(value="/admin/detail", method=RequestMethod.GET)
-	public String detailBoard(@RequestParam int bno, Model model, HttpSession session){
-
-		Professor professor = (Professor)session.getAttribute("LOGIN_USER");
-		
-		if (professor == null) {
-			return "redirect:/login?err=deny";
-		}
-		
+	public String detailBoard(@RequestParam int bno, Model model, Professor professor){
 		// 조회수 중복 증가 ㄴㄴ
 		List<BoardView> viewUser = boardService.getBoardViewUser(bno);
 		if (!viewUser.isEmpty()) {
@@ -210,13 +200,11 @@ public class BoardController {
 	
 	// 어드민 게시글 등록
 	@RequestMapping(value="/admin/boardForm", method=RequestMethod.POST)
-	public String addBoard(@Valid BoardForm boardForm, Errors errors, HttpSession session)throws Exception{
+	public String addBoard(@Valid BoardForm boardForm, Errors errors, Professor professor)throws Exception{
 		
 		if (errors.hasErrors()) {
 			return "/board/boardform";
 		}
-		
-		Professor professor = (Professor)session.getAttribute("LOGIN_USER");
 		
 		if (professor == null) {
 			return "redirect:/login?err=deny";
@@ -311,7 +299,7 @@ public class BoardController {
 	}
 	
 	@RequestMapping(value="/prof/profnoticeboard", method=RequestMethod.GET)
-	public String profNoticeBoard(){
+	public String profNoticeBoard(Professor professor){
 		
 		return "/profboard/profnoticeboard";
 	}
@@ -323,7 +311,7 @@ public class BoardController {
 	
 	
 	@RequestMapping(value="/prof/profdeptboard", method=RequestMethod.GET)
-	public String profdeptBoard(HttpSession session, SearchForm searchForm,Professor prof , Model model){
+	public String profdeptBoard(SearchForm searchForm,Professor prof , Model model){
 		
 		SiteMap sitemap = sitemapSerivce.getSitemapByCodeService(prof.getDivision());
 		
@@ -361,9 +349,8 @@ public class BoardController {
 	
 	
 	@RequestMapping(value="/prof/profboardform", method=RequestMethod.POST)
-	public String addProfDeptBoardForm(@Valid BoardForm boardForm, Errors err, Model model, HttpSession session)throws Exception{
+	public String addProfDeptBoardForm(@Valid BoardForm boardForm, Errors err, Model model, Professor prof)throws Exception{
 		
-		Professor prof = (Professor)session.getAttribute("LOGIN_USER");
 		SiteMap sitemap = sitemapSerivce.getSitemapByCodeService(prof.getDivision());
 		
 		if (err.hasErrors()) {
@@ -499,7 +486,9 @@ public class BoardController {
 	// 학과 게시판 보이기
 	@RequestMapping(value="/stud/studeptboard", method=RequestMethod.GET)
 	public String studeptboard (Student student, SearchForm searchForm, Model model) {
-		searchForm.setDepartment(student.getDivision());
+		SiteMap siteMap = sitemapSerivce.getSitemapByCodeService(student.getDivision());
+		System.out.println(siteMap.getName());
+		searchForm.setDepartment(siteMap.getName());
 		searchForm.setSearchBoardType("D");
 		
 		int rows = boardService.searchBoardCount(searchForm);
@@ -605,14 +594,12 @@ public class BoardController {
 		Review review = reviewService.getReviewByNo(rno);
 		
 		if (!student.getName().equals(review.getWriter())) {
-			return "/stud/deletedeptboardreview?err=deny";
+			return "redirect:/stud/deptboarddetail?bno="+review.getGroupNo()+"&err=deny";
 		}else {
 			reviewService.deleteReview(rno);
 		}
 		return "redirect:/stud/deptboarddetail?bno="+review.getGroupNo();
 	}
-	
-	
 	
 	// 학생 자유
 	@RequestMapping(value="/stud/stufreeboard", method=RequestMethod.GET)
@@ -773,7 +760,6 @@ public class BoardController {
 		
 		searchForm.setDisplay(10);
 		boardList = boardService.searchBoard(searchForm);
-		
 		model.addAttribute("subject", subjectCode);
 		model.addAttribute("search", searchForm);
 		model.addAttribute("boardList", boardList);
@@ -816,9 +802,12 @@ public class BoardController {
 		searchForm.setEndIndex(pageNation.getEndIndex());
 		
 		searchForm.setDisplay(10);
+		
+		System.out.println(searchForm);
+		
 		List<Board> boardList = boardService.searchBoard(searchForm);
 		
-		
+		System.out.println(boardList);
 		
 		model.addAttribute("subject", subjectCode);
 		model.addAttribute("search", searchForm);
